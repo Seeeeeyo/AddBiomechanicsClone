@@ -1,3 +1,5 @@
+`pip3 install nimblephysics==0.10.52.1`
+
 ### AddBiomechanics
 
 [![DOI](https://zenodo.org/badge/398424759.svg)](https://zenodo.org/badge/latestdoi/398424759)
