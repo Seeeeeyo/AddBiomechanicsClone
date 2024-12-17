@@ -420,14 +420,20 @@ const SubjectView = observer((props: SubjectViewProps) => {
 
     //////////////////////////////////////////////////////////////////
     // 1.6. Create the entry for uploading a custom OpenSim model, if needed
+    // MODIFIED
     if (subjectModel === 'custom') {
         totalFormElements++;
         if (formCompleteSoFar) {
-            formElements.push(<div key="customModel" className="mb-3">
-                <label>Upload Custom OpenSim Model:</label>
-                <DropFile file={subjectState.customOpensimModel} accept=".osim" onDrop={subjectState.dropOpensimFile} readonly={props.readonly}></DropFile>
-                <div id="customModelHelp" className="form-text">Custom OpenSim file to scale for the subject.</div>
-            </div>);
+            // formElements.push(<div key="customModel" className="mb-3">
+            //     <label>Upload Custom OpenSim Model:</label>
+            //     <DropFile file={subjectState.customOpensimModel} accept=".osim" onDrop={subjectState.dropOpensimFile} readonly={props.readonly}></DropFile>
+            //     <div id="customModelHelp" className="form-text">Custom OpenSim file to scale for the subject.</div>
+            // </div>);
+
+            // HERE
+            subjectState.customOpensimModel.uploadFile(subjectJson.getAttribute("customModel", ""));
+
+            // formElements.push(
 
             if (!subjectState.customOpensimModel.exists) {
                 formCompleteSoFar = false;
@@ -853,19 +859,35 @@ const SubjectView = observer((props: SubjectViewProps) => {
                     const markerLiveFile = markerLiveFiles[i];
                     let dataFiles: React.ReactElement[] = [];
 
-                    dataFiles.push(
-                        <div key='markers'>
-                            <DropFile file={markerLiveFile} accept=".c3d,.trc" readonly={props.readonly} onDrop={(files: File[]) => subjectState.dropMarkerFiles(trial, files)} />
-                        </div>
-                    );
-                    if (trial.trcFileExists && !trial.c3dFileExists && !disableDynamics) {
-                        const grfMotLiveFile = home.dir.getLiveFile(trial.grfMotFilePath);
-                        dataFiles.push(
-                            <div key='grf' className="mt-2">
-                                <DropFile file={grfMotLiveFile} accept=".mot" text="GRF *.mot file" readonly={props.readonly} onDrop={(files: File[]) => subjectState.dropGRFFiles(trial, files)} />
-                            </div>
-                        );
-                    }
+                    // dataFiles.push(
+                    //     <div key='markers'>
+                    //         {<DropFile file={markerLiveFile} accept=".c3d,.trc" readonly={props.readonly} onDrop={(files: File[]) => subjectState.dropMarkerFiles(trial, files)} />}
+                    //     </div>
+                    // );
+
+                    // subjectState.customOpensimModel.uploadFile(subjectJson.getAttribute("customModel", ""));
+
+                    // load the cariable 'customTRC' from the subjectJson
+                    // const customTRC = subjectJson.getAttribute("customTRC", "");
+                    // create file from the path /home/selim/Downloads/Danny/TVC03_TEST31/trials/gait/markers.trc"
+
+                    // HERE
+                    // const customTRCFilePath = subjectJson.getAttribute("customTRC", "")
+                    const localFilePath = "/home/selim/Downloads/Danny/TVC03_TEST50/trials/gait/markers.trc";
+                    const localFile = new File([localFilePath], "markers.trc", { type: "text/plain" });
+                    subjectState.dropMarkerFiles(trial, [localFile]);
+
+                    // subjectState.dropMarkerFiles(trial, [customTRCFile]);
+
+
+                    // if (trial.trcFileExists && !trial.c3dFileExists && !disableDynamics) {
+                    //     const grfMotLiveFile = home.dir.getLiveFile(trial.grfMotFilePath);
+                    //     dataFiles.push(
+                    //         <div key='grf' className="mt-2">
+                    //             <DropFile file={grfMotLiveFile} accept=".mot" text="GRF *.mot file" readonly={props.readonly} onDrop={(files: File[]) => subjectState.dropGRFFiles(trial, files)} />
+                    //         </div>
+                    //     );
+                    // }
 
                     const trialTags = trial.trialJson.getAttribute("trialTags", []);
                     const trialTagValues = subjectJson.getAttribute("trialTagValues", {} as { [key: string]: number });
@@ -1445,3 +1467,16 @@ const SubjectView = observer((props: SubjectViewProps) => {
 });
 
 export default SubjectView;
+
+export const setSubjectAttribute = (subjectJson: any, key: string, value: any) => {
+    subjectJson.setAttribute(key, value);
+};
+
+export const uploadMarkerFiles = (subjectState: any, trialName: string, files: File[]) => {
+    const trial = subjectState.trials.find((t: any) => t.name === trialName);
+    if (trial) {
+        subjectState.dropMarkerFiles(trial, files);
+    } else {
+        console.error(`Trial ${trialName} not found.`);
+    }
+};
